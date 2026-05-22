@@ -28,7 +28,7 @@ const STATUS_MN = {
 };
 
 export default function MyOrdersPage() {
-  const { user, loading: authLoading, logout, refetch } = useSession();
+  const { user, loading: authLoading, logout, refetch, updateUser } = useSession();
   const router   = useRouter();
   const avatarInputRef = useRef(null);
   const [orders,  setOrders]  = useState([]); // Захиалгуудын жагсаалт
@@ -57,7 +57,12 @@ export default function MyOrdersPage() {
     const res = await fetch(`/api/users/${user?.id}/avatar`, {
       method: "POST", credentials: "include", body: fd,
     });
-    if (res.ok) { await refetch(); } // Зураг амжилттай солигдвол session-ийг шинэчилнэ
+    const data = await res.json().catch(() => ({}));
+    if (res.ok) {
+      updateUser(data.user);
+      await refetch();
+    } // Зураг амжилттай солигдвол session-ийг шинэчилнэ
+    e.target.value = "";
   }
 
   if (authLoading || !user) return null;

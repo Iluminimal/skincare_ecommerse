@@ -26,6 +26,13 @@ export function SessionProvider({ children }) {
   const [user,    setUser]    = useState(undefined);
   const [loading, setLoading] = useState(true);
 
+  const updateUser = useCallback((nextUser) => {
+    setUser((current) => {
+      if (!nextUser) return current;
+      return current ? { ...current, ...nextUser } : nextUser;
+    });
+  }, []);
+
   // Серверээс одоогийн session хэрэглэгчийг унших
   const refetch = useCallback(async () => {
     try {
@@ -87,7 +94,7 @@ export function SessionProvider({ children }) {
   }, []);
 
   return (
-    <Ctx.Provider value={{ user, loading, login, register, logout, refetch }}>
+    <Ctx.Provider value={{ user, loading, login, register, logout, refetch, updateUser }}>
       {children}
     </Ctx.Provider>
   );

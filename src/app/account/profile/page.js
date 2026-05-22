@@ -19,7 +19,7 @@ import { getAvatarUrl } from "@/lib/utils";
 import { announce } from "@/lib/announcer";
 
 export default function ProfilePage() {
-  const { user, loading: authLoading, refetch, logout } = useSession();
+  const { user, loading: authLoading, refetch, logout, updateUser } = useSession();
   const router = useRouter();
   const avatarInputRef = useRef(null);
 
@@ -60,6 +60,7 @@ export default function ProfilePage() {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Хадгалахад алдаа гарлаа");
       
+      updateUser(data.user);
       await refetch();
       setIsEditing(false);
       setMsg({ type: "ok", text: "Профайл амжилттай шинэчлэгдлээ" });
@@ -102,13 +103,17 @@ export default function ProfilePage() {
     const res = await fetch(`/api/users/${user.id}/avatar`, {
       method: "POST", credentials: "include", body: fd,
     });
+    const data = await res.json().catch(() => ({}));
     if (res.ok) {
+      updateUser(data.user);
       await refetch();
+      setMsg({ type: "ok", text: "Профайл зураг амжилттай шинэчлэгдлээ" });
       announce("Профайл зураг амжилттай шинэчлэгдлээ");
     } else {
-      const data = await res.json().catch(() => ({}));
+      setMsg({ type: "err", text: data.error || "Зураг байршуулхад алдаа гарлаа" });
       announce(data.error || "Зураг байршуулахад алдаа гарлаа", "assertive");
     }
+    e.target.value = "";
   }
 
   if (authLoading || !user) return null;
